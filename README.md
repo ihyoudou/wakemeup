@@ -1,6 +1,6 @@
 # Wakemeup
 
-Simple application that i wrote to learn a bit more about MongoDB. It is fully compatible with PHP 8.0 and uses Slim Framework 4.
+Simple application that i wrote to learn a bit more about MongoDB. It is fully compatible with PHP 8.0 and uses Slim Framework 4. Definitely a WIP.
 
 ## Requriements
 * PHP 8.0 webserver (with xml, mongodb, curl modules)
