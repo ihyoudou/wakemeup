@@ -16,8 +16,8 @@
     $app = AppFactory::create();
 
     // Create Twig
-    $twig = Twig::create('../templates/', ['cache' => '../cache/']);
-
+    // $twig = Twig::create('../templates/', ['cache' => '../cache/']);
+    $twig = Twig::create('../templates/', ['cache' => false]);
     // Add Twig-View Middleware
     $app->add(TwigMiddleware::create($app, $twig));
 
@@ -121,7 +121,7 @@
                     'success'=> false,
                     'reason'=>'captchaInvalid'
                 );
-                return $response->withJson($data, 500);
+                return $response->withJson($data, 200);
             }
             
         } else { // if body is empty

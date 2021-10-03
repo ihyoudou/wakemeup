@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", function(event) { 
+    getURLcount().then(count => {
+        document.getElementById("pingcount").innerHTML = '<p class="text-muted fw-light">pinging '+count['count']+' urls</p>';
+      });
     document.getElementById("addButton").addEventListener("click", function() {
         let hcaptchaResult = document.getElementsByName("g-recaptcha-response")[0].value;
         let url = document.getElementById('url').value;
@@ -34,3 +37,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
         
     }); 
 });
+
+async function getURLcount(){
+    const response = await fetch('/api/v1/getURLcount');
+    const count = await response.json();
+    return count;
+}
