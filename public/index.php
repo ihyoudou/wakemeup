@@ -16,8 +16,8 @@
     $app = AppFactory::create();
 
     // Create Twig
-    // $twig = Twig::create('../templates/', ['cache' => '../cache/']);
-    $twig = Twig::create('../templates/', ['cache' => false]);
+    $twig = Twig::create('../templates/', ['cache' => '../cache/']);
+    // $twig = Twig::create('../templates/', ['cache' => false]); //disabling cache for debuging
     // Add Twig-View Middleware
     $app->add(TwigMiddleware::create($app, $twig));
 
