@@ -5,8 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <script src="/assets/js/main.js"></script>
 </head>
 <body>
-    {{ name }}
+    <h1>{{appname}}</h1>
+    <div>
+        <input type="text" id="url" name="url" placeholder="URL to your application">
+        <div class="h-captcha" data-sitekey="{{hcaptchaSiteKey}}"></div>
+        <button id="addButton" name="addButton">add</button>
+
+    </div>
 </body>
 </html>
