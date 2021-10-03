@@ -39,7 +39,36 @@
             'count'=>$count
         );
         return $response->withJson($jsonData, 200);
-    });
+    })->setName('getURLcount');
+
+    // /api/v1/cron GET endpoint
+    // this endpoint is used to executing pinging to websites
+    // it is required to provide secret that is set in .env file to execute
+    $app->get('/api/v1/cron', function ($request, $response, $args) {
+        $secret = $request->getQueryParams()['secret'];
+        if($secret == $_ENV['APP_CRONSECRET']){
+            global $collection;
+            $documents = $collection->find()->toArray();
+            foreach ($documents as $entry) {
+                $url = $entry['url'];
+
+                $curl = curl_init($url);
+                curl_setopt($curl, CURLOPT_URL, $url);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3); 
+                curl_setopt($curl, CURLOPT_TIMEOUT, 3); //timeout in seconds
+                curl_setopt($curl, CURLOPT_USERAGENT, $_ENV['USERAGENT']);
+                $resp = curl_exec($curl);
+                curl_close($curl);
+                
+                echo $entry['url'],"<br>";
+            }
+            return $response->write('executing...');
+        } else {
+            return $response->withStatus(403);
+        }
+        
+    })->setName('cron');
 
     // /api/v1/addURL POST endpoint
     // this endpoint is used to add a new link to system
@@ -51,47 +80,56 @@
         $data = json_decode($json, true);
         
         $url = $data['url'];
-
+        $hcaptchaResponse = $data['captchaResponse'];
+        
 
         // checking if array is not empty and value is a valid url
         if(!empty($data['url']) && filter_var($url, FILTER_VALIDATE_URL)){
-            
-            $checkIfExist = $collection->find( [ 'url' => $url] )->toArray();
-            // checking if url is not already in db
-            if(!empty($checkIfExist[0]['url'])){
-                // if it is, returning 200 http code with success = false
+
+            $verifyingCaptcha = validateCaptcha($hcaptchaResponse);
+
+            if($verifyingCaptcha){
+
+                $checkIfExist = $collection->find( [ 'url' => $url] )->toArray();
+                // checking if url is not already in db
+                if(!empty($checkIfExist[0]['url'])){
+                    // if it is, returning 200 http code with success = false
+                    $data = array(
+                        'success'=> false,
+                        'reason'=>'urlExist'
+                    );
+                    return $response->withJson($data, 200);
+
+                } else { // if it not exist - inserting into db and returning result
+                    $addNewURL = $collection->insertOne(
+                        [
+                            'url'=>$url,
+                            'date'=>microtime(true)
+                        ]
+                    );
+                    // creating array with json response
+                    $data = array(
+                        'success'=> true,
+                        'id'=>$addNewURL->getInsertedId()
+                    );
+
+                    return $response->withJson($data, 200);
+
+                }
+            } else { // if captcha validation failed
                 $data = array(
                     'success'=> false,
-                    'reason'=>'urlExist'
+                    'reason'=>'captchaInvalid'
                 );
-                return $response->withJson($data, 200);
-
-            } else {
-                // if it not exist - inserting into db and returning result
-                $addNewURL = $collection->insertOne(
-                    [
-                        'url'=>$url,
-                        'date'=>microtime(true)
-                    ]
-                );
-                // creating array with json response
-                $data = array(
-                    'success'=> true,
-                    'id'=>$addNewURL->getInsertedId()
-                );
-
-                return $response->withJson($data, 200);
-
+                return $response->withJson($data, 500);
             }
-
             
-        } else {
-            // if body is empty
+        } else { // if body is empty
             $data = array(
                     'success'=> false,
                     'reason'=>'missingBodyOrBadURL'
             );
-            return $response->withJson($data, 500);
+            return $response->withJson($data, 200);
                 
         }
 

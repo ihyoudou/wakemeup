@@ -23,6 +23,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
                     alert("This URL is already in database!");
                 } else if(content['reason'] == "missingBodyOrBadURL"){
                     alert("The URL your entered is invalid");
+                } else if(content['reason'] == "captchaInvalid"){
+                    alert("Captcha result was invalid, please try again");
                 } else {
                     alert("Unknown error, please try again later");
                 }
