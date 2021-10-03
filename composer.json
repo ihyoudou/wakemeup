@@ -1,0 +1,15 @@
+{
+    "require": {
+        "slim/slim": "4.*",
+        "slim/psr7": "^1.5",
+        "nyholm/psr7": "^1.4",
+        "nyholm/psr7-server": "^1.0",
+        "guzzlehttp/psr7": "^2.0",
+        "http-interop/http-factory-guzzle": "^1.2",
+        "laminas/laminas-diactoros": "^2.8",
+        "slim/twig-view": "^3.2",
+        "vlucas/phpdotenv": "^5.3",
+        "mongodb/mongodb": "^1.9",
+        "slim/http": "^1.2"
+    }
+}
