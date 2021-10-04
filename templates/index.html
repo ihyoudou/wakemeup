@@ -29,12 +29,14 @@
               <span class="fs-4">{{appname}}</span>
             </a>
             </div>
-      
+            <div id="alerts"></div>
           <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
+            
             <div>
-                <input type="text" id="url" name="url" placeholder="URL to your application" class="form-control">
+                <input type="url" id="url" name="url" placeholder="URL to your application" class="form-control">
                 <div class="h-captcha" data-sitekey="{{hcaptchaSiteKey}}"></div>
                 <button id="addButton" name="addButton" class="btn btn-primary">Add</button>
+                <div id="spinner"></div>
             </div>
             
           </div>
