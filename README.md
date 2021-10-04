@@ -13,9 +13,13 @@ The idea of the application is simple - it has to visit saved URLs every X time 
 ```
 composer install
 ```
-rename .env.example to .env and edit settings, change your webserver settings to use public/index.php for all requests, more information you can find in [slim framework docs](https://www.slimframework.com/docs/v4/start/web-servers.html)
+Rename .env.example to .env and enter proper values for database server. Also you can set own user agent, referer and timeout for curl. Change your webserver settings to use public/index.php for all requests, more information you can find in [slim framework docs](https://www.slimframework.com/docs/v4/start/web-servers.html)
 
-add to crontab
+To call websites from list you need to add cronjob
 ```
-*/25 * * * * curl -s -o /dev/null https://yoururl.zzz/api/v1/cron?secret=your_secret > /dev/null 2>&1
+*/25 * * * * php8.0 /var/www/wakemeup/cron.php > /dev/null 2>&1
 ```
+Change the path to a real one. This cronjob above will be called in every 25 minutes.
+
+## Make modifications
+To change homepage, you can edit the templates/index.html file and flush twig cache.

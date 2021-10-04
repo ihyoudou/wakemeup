@@ -9,9 +9,10 @@ use Slim\Views\TwigMiddleware;
 // loading env file
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->safeLoad();
+$dbname = $_ENV['DBNAME'];
 
 $db = new MongoDB\Client($_ENV['MONGODB']);
-$collection = $db->wakemeup->towakeup;
+$collection = $db->$dbname->towakeup;
 
 // Create App
 $app = AppFactory::create();
@@ -47,33 +48,6 @@ $app->get('/api/v1/getURLcount', function ($request, $response, $args) {
     return $response->withJson($jsonData, 200);
 })->setName('getURLcount');
 
-// /api/v1/cron GET endpoint
-// this endpoint is used to executing pinging to websites
-// it is required to provide secret that is set in .env file to execute
-$app->get('/api/v1/cron', function ($request, $response, $args) {
-    $secret = $request->getQueryParams()['secret'];
-    if ($secret == $_ENV['APP_CRONSECRET']) {
-        global $collection;
-        $documents = $collection->find()->toArray();
-        foreach ($documents as $entry) {
-            $url = $entry['url'];
-
-            $curl = curl_init($url);
-            curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
-            curl_setopt($curl, CURLOPT_TIMEOUT, 3); //timeout in seconds
-            curl_setopt($curl, CURLOPT_USERAGENT, $_ENV['USERAGENT']);
-            $resp = curl_exec($curl);
-            curl_close($curl);
-
-            echo $entry['url'], "<br>";
-        }
-        return $response->write('executing...');
-    } else {
-        return $response->withStatus(403);
-    }
-})->setName('cron');
 
 // /api/v1/addURL POST endpoint
 // this endpoint is used to add a new link to system
