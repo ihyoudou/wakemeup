@@ -11,11 +11,20 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->safeLoad();
 $dbname = $_ENV['DBNAME'];
 
+if($_ENV['MEMCAHCED_ENABLED'] == 'true'){
+    $memcached = new Memcached();
+    $memcached->addServer($_ENV['MEMCACHED_SERVER'], $_ENV['MEMCACHED_PORT']);
+}
+
 $db = new MongoDB\Client($_ENV['MONGODB']);
 $collection = $db->$dbname->towakeup;
-
+ 
 // Create App
 $app = AppFactory::create();
+
+// caching routes
+$routeCollector = $app->getRouteCollector();
+$routeCollector->setCacheFile(__DIR__ . '/../cache/routes.cachefile');
 
 // Create Twig
 if ($_ENV['APP_ENV'] == "prod") {
@@ -41,10 +50,26 @@ $app->get('/', function ($request, $response, $args) {
 // this endpoint is used to get current documents count in db
 $app->get('/api/v1/getURLcount', function ($request, $response, $args) {
     global $collection;
-    $count = $collection->count();
-    $jsonData = array(
-        'count' => $count
-    );
+    global $memcached;
+    if($_ENV['MEMCAHCED_ENABLED'] == 'true'){
+        $jsonData = $memcached->get("wkm_urlCount");
+
+        if (!$jsonData){ // if memcached cache is empty
+            $count = $collection->count();
+            $jsonData = array(
+                'count' => $count
+            );
+            $memcached->set("wkm_urlCount", $jsonData, $_ENV['MEMCACHED_STORETIME']) or die("Cannot create memcached object");
+        }
+    } else { // if memcached is not enabled
+        $count = $collection->count();
+        $jsonData = array(
+            'count' => $count
+        );
+    }
+   
+
+    
     return $response->withJson($jsonData, 200);
 })->setName('getURLcount');
 
